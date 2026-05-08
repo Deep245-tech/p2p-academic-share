@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${resource.title} + ' - P2P Academic Share'">Resource Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .resource-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        .ipfs-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-family: monospace;
+        }
+        .action-buttons .btn {
+            margin-right: 10px;
+        }
+        .star-rating {
+            direction: rtl;
+            display: inline-block;
+        }
+        .star-rating input {
+            display: none;
+        }
+        .star-rating label {
+            color: #ddd;
+            font-size: 24px;
+            padding: 0 2px;
+            cursor: pointer;
+        }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-share"></i> P2P Academic Share
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/resources">Browse</a>
+                <a class="nav-link" href="/dashboard" th:if="${session.userId != null}">Dashboard</a>
+                <a class="nav-link" href="/login" th:if="${session.userId == null}">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Resource Header -->
+    <div class="resource-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5" th:text="${resource.title}">Resource Title</h1>
+                    <p class="lead mb-2" th:text="${resource.description}">Description</p>
+                    
+                    <div class="mt-3">
+                        <span class="badge bg-light text-dark me-2" th:text="${resource.resourceType}">Type</span>
+                        <span class="badge bg-light text-dark me-2" th:text="${resource.category}">Category</span>
+                        <span class="badge bg-success me-2" th:if="${resource.verificationStatus.name() == 'VERIFIED'}">
+                            <i class="bi bi-check-circle"></i> Verified
+                        </span>
+                        <span class="ipfs-badge">
+                            <i class="bi bi-box"></i> IPFS: 
+                            <span th:text="${#strings.abbreviate(resource.ipfsHash, 15)}">Hash</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="quality-score">
+                        <h2 class="mb-0">
+                            <span th:text="${#numbers.formatDecimal(resource.qualityScore, 1, 1)}">0.0</span>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </h2>
+                        <small>Quality Score</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-md-8">
+                <!-- Action Buttons -->
+                <div class="card mb-4">
+                    <div class="card-body action-buttons">
+                        <a th:href="@{/api/files/download/{id}(id=${resource.id})}" 
+                           class="btn btn-primary btn-lg">
+                            <i class="bi bi-download"></i> Download Resource
+                        </a>
+                        <a th:href="@{/api/files/view/{id}(id=${resource.id})}" 
+                           target="_blank"
+                           class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-eye"></i> Preview
+                        </a>
+                        
+                        <div th:if="${session.userId != null && !isOwner && resource.verificationStatus.name() == 'PENDING'}">
+                            <form th:action="@{/resources/{id}/verify(id=${resource.id})}" 
+                                  method="post" class="d-inline">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-shield-check"></i> Verify Resource
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resource Details -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Resource Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="150">File Name:</th>
+                                <td th:text="${resource.fileName}">file.pdf</td>
+                            </tr>
+                            <tr>
+                                <th>File Type:</th>
+                                <td th:text="${resource.fileType}">application/pdf</td>
+                            </tr>
+                            <tr>
+                                <th>File Size:</th>
+                                <td th:text="${#numbers.formatDecimal(resource.fileSize / 1024 / 1024, 1, 2)} + ' MB'">0.0 MB</td>
+                            </tr>
+                            <tr>
+                                <th>Uploaded By:</th>
+                                <td>
+                                    <a th:href="@{/profile/{id}(id=${resource.uploader.id})}" 
+                                       th:text="${resource.uploader.username}">
+                                        username
+                                    </a>
+                                    <span class="badge bg-info ms-2" 
+                                          th:text="${resource.uploader.reputationScore} + ' ★'">
+                                        Reputation
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Upload Date:</th>
+                                <td th:text="${#temporals.format(resource.uploadedAt, 'dd MMM yyyy, HH:mm')}">Date</td>
+                            </tr>
+                            <tr th:if="${resource.courseCode}">
+                                <th>Course Code:</th>
+                                <td th:text="${resource.courseCode}">CS101</td>
+                            </tr>
+                            <tr th:if="${resource.institution}">
+                                <th>Institution:</th>
+                                <td th:text="${resource.institution}">University</td>
+                            </tr>
+                            <tr th:if="${resource.tags}">
+                                <th>Tags:</th>
+                                <td>
+                                    <span class="badge bg-secondary me-1" 
+                                          th:each="tag : ${#strings.arraySplit(resource.tags, ',')}"
+                                          th:text="${tag}">tag</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- IPFS Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-database"></i> IPFS Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            This resource is stored on IPFS - a decentralized peer-to-peer network.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">IPFS Hash:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" th:value="${resource.ipfsHash}" readonly>
+                                <button class="btn btn-outline-secondary" onclick="copyHash()">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Alternative Access:</label>
+                            <div>
+                                <a th:href="'https://ipfs.io/ipfs/' + ${resource.ipfsHash}" 
+                                   target="_blank" class="btn btn-outline-secondary btn-sm me-2">
+                                    IPFS Public Gateway
+                                </a>
+                                <a th:href="'http://localhost:8080/ipfs/' + ${resource.ipfsHash}" 
+                                   target="_blank" class="btn btn-outline-secondary btn-sm">
+                                    Local Gateway
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Reviews & Ratings</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Add Review -->
+                        <div th:if="${session.userId != null && !isOwner}" class="mb-4">
+                            <h6>Write a Review</h6>
+                            <form id="reviewForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Rating:</label>
+                                    <div class="star-rating">
+                                        <input type="radio" id="star5" name="rating" value="5">
+                                        <label for="star5" title="5 stars">★</label>
+                                        <input type="radio" id="star4" name="rating" value="4">
+                                        <label for="star4" title="4 stars">★</label>
+                                        <input type="radio" id="star3" name="rating" value="3">
+                                        <label for="star3" title="3 stars">★</label>
+                                        <input type="radio" id="star2" name="rating" value="2">
+                                        <label for="star2" title="2 stars">★</label>
+                                        <input type="radio" id="star1" name="rating" value="1">
+                                        <label for="star1" title="1 star">★</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <textarea class="form-control" name="comment" rows="3" 
+                                              placeholder="Write your review..."></textarea>
+                                </div>
+                                
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="helpful" name="helpful">
+                                    <label class="form-check-label" for="helpful">
+                                        Mark as helpful resource
+                                    </label>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    Submit Review
+                                </button>
+                            </form>
+                            <hr>
+                        </div>
+                        
+                        <!-- Reviews List -->
+                        <div th:if="${#lists.isEmpty(resource.reviews)}">
+                            <p class="text-muted">No reviews yet. Be the first to review!</p>
+                        </div>
+                        
+                        <div th:each="review : ${resource.reviews}" class="review-item mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong th:text="${review.reviewer.username}">Username</strong>
+                                    <span class="text-warning ms-2">
+                                        <i class="bi bi-star-fill" th:each="i : ${#numbers.sequence(1, review.rating)}"></i>
+                                        <i class="bi bi-star" th:each="i : ${#numbers.sequence(1, 5 - review.rating)}"></i>
+                                    </span>
+                                    <span class="badge bg-success ms-2" th:if="${review.isHelpful}">
+                                        Helpful
+                                    </span>
+                                </div>
+                                <small class="text-muted" 
+                                       th:text="${#temporals.format(review.reviewedAt, 'dd MMM yyyy')}">
+                                    Date
+                                </small>
+                            </div>
+                            <p class="mt-2 mb-0" th:text="${review.comment}">Review comment</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Stats Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <h4 th:text="${resource.downloadCount}">0</h4>
+                                <small class="text-muted">
+                                    <i class="bi bi-download"></i> Downloads
+                                </small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <h4 th:text="${resource.viewCount}">0</h4>
+                                <small class="text-muted">
+                                    <i class="bi bi-eye"></i> Views
+                                </small>
+                            </div>
+                            <div class="col-6">
+                                <h4 th:text="${#lists.size(resource.reviews)}">0</h4>
+                                <small class="text-muted">
+                                    <i class="bi bi-chat"></i> Reviews
+                                </small>
+                            </div>
+                            <div class="col-6">
+                                <h4 th:text="${resource.uploader.verifiedUploads}">0</h4>
+                                <small class="text-muted">
+                                    <i class="bi bi-check-circle"></i> Verified Uploads
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Uploader Info -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">About Uploader</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="bi bi-person-circle fs-1"></i>
+                        <h6 class="mt-2" th:text="${resource.uploader.username}">Username</h6>
+                        <p class="text-muted" th:text="${resource.uploader.email}">email@example.com</p>
+                        
+                        <div class="mb-3">
+                            <span class="badge bg-primary" th:text="${resource.uploader.role}">Role</span>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <strong th:text="${resource.uploader.totalUploads}">0</strong><br>
+                                <small>Total Uploads</small>
+                            </div>
+                            <div class="col-6">
+                                <strong th:text="${resource.uploader.totalReviews}">0</strong><br>
+                                <small>Reviews Given</small>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <a th:href="@{/profile/{id}(id=${resource.uploader.id})}" 
+                           class="btn btn-outline-primary btn-sm w-100">
+                            View Full Profile
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Similar Resources -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Similar Resources</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted text-center py-3">
+                            <i class="bi bi-search fs-1"></i><br>
+                            Coming soon...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light mt-5 py-4">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 P2P Academic Share - Decentralized Resource Sharing Platform</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function copyHash() {
+            const hashInput = document.querySelector('input[readonly]');
+            hashInput.select();
+            document.execCommand('copy');
+            alert('IPFS hash copied to clipboard!');
+        }
+        
+        // Review form submission
+        document.getElementById('reviewForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch(`/api/users/resources/${resourceId}/review`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('Review submitted successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to submit review');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting review');
+            }
+        });
+        
+        // Get resource ID from URL
+        const resourceId = window.location.pathname.split('/').pop();
+    </script>
+</body>
+</html>

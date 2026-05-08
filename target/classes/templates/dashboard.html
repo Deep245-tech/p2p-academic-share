@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - P2P Academic Share</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .token-balance {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .contribution-score {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-share"></i> P2P Academic Share
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/resources">Browse</a>
+                <a class="nav-link" href="/upload">Upload</a>
+                <a class="nav-link" href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <h2 class="mb-4">
+            Welcome back, <span th:text="${user.username}">User</span>!
+        </h2>
+
+        <!-- Stats Overview -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stat-card text-center">
+                    <i class="bi bi-coin fs-1"></i>
+                    <h3 class="mt-2">Token Balance</h3>
+                    <div class="token-balance" th:text="${tokenBalance.currentBalance}">0</div>
+                    <p class="mb-0">Total Earned: <span th:text="${tokenBalance.totalEarned}">0</span></p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card text-center">
+                    <i class="bi bi-star fs-1"></i>
+                    <h3 class="mt-2">Reputation</h3>
+                    <div class="token-balance" th:text="${#numbers.formatDecimal(user.reputationScore, 1, 1)}">0.0</div>
+                    <p class="mb-0">Verified Uploads: <span th:text="${user.verifiedUploads}">0</span></p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card text-center">
+                    <i class="bi bi-graph-up fs-1"></i>
+                    <h3 class="mt-2">Contribution Score</h3>
+                    <div class="token-balance" th:text="${#numbers.formatDecimal(contributionScore, 1, 0)}">0</div>
+                    <span class="contribution-score">
+                        <i class="bi bi-trophy"></i> Proof of Contribution
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Quick Actions</h5>
+                        <div class="btn-group">
+                            <a href="/upload" class="btn btn-primary">
+                                <i class="bi bi-upload"></i> Upload New Resource
+                            </a>
+                            <a href="/resources" class="btn btn-outline-primary">
+                                <i class="bi bi-search"></i> Browse Resources
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Resources -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">My Uploaded Resources</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(userResources)}">
+                            <p class="text-muted">You haven't uploaded any resources yet.</p>
+                            <a href="/upload" class="btn btn-primary">Upload Your First Resource</a>
+                        </div>
+                        <div class="table-responsive" th:if="${not #lists.isEmpty(userResources)}">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Quality Score</th>
+                                        <th>Downloads</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="resource : ${userResources}">
+                                        <td th:text="${resource.title}">Title</td>
+                                        <td th:text="${resource.resourceType}">Type</td>
+                                        <td>
+                                            <span class="badge bg-warning" th:if="${resource.verificationStatus.name() == 'PENDING'}">Pending</span>
+                                            <span class="badge bg-success" th:if="${resource.verificationStatus.name() == 'VERIFIED'}">Verified</span>
+                                            <span class="badge bg-danger" th:if="${resource.verificationStatus.name() == 'REJECTED'}">Rejected</span>
+                                        </td>
+                                        <td>
+                                            <span th:text="${#numbers.formatDecimal(resource.qualityScore, 1, 1)}">0.0</span>
+                                            <i class="bi bi-star-fill text-warning"></i>
+                                        </td>
+                                        <td th:text="${resource.downloadCount}">0</td>
+                                        <td>
+                                            <a th:href="@{/resources/{id}(id=${resource.id})}" 
+                                               class="btn btn-sm btn-outline-primary">View</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Token Transactions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Reason</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="tx : ${transactions}" th:if="${tx != null}">
+                                        <td th:text="${#temporals.format(tx.createdAt, 'yyyy-MM-dd HH:mm')}">Date</td>
+                                        <td>
+                                            <span class="badge bg-success" th:if="${tx.transactionType.name() == 'CREDIT'}">Credit</span>
+                                            <span class="badge bg-danger" th:if="${tx.transactionType.name() == 'DEBIT'}">Debit</span>
+                                        </td>
+                                        <td>
+                                            <span th:class="${tx.transactionType.name() == 'CREDIT' ? 'text-success' : 'text-danger'}">
+                                                <span th:text="${tx.transactionType.name() == 'CREDIT' ? '+' : '-'}"></span>
+                                                <span th:text="${tx.amount}">0</span>
+                                            </span>
+                                        </td>
+                                        <td th:text="${tx.transactionReason}">Reason</td>
+                                        <td th:text="${tx.description}">Description</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

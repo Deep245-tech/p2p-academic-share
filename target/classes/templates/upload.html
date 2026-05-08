@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Resource - P2P Academic Share</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-share"></i> P2P Academic Share
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+                <a class="nav-link" href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="bi bi-cloud-upload"></i> Upload Academic Resource
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Proof of Contribution:</strong> Earn 10 tokens for uploading! 
+                            Quality content can earn up to 25 additional bonus tokens.
+                        </div>
+
+                        <form action="/api/files/upload" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title *</label>
+                                <input type="text" class="form-control" id="title" name="title" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description *</label>
+                                <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="resourceType" class="form-label">Resource Type *</label>
+                                    <select class="form-select" id="resourceType" name="resourceType" required>
+    <option value="">Select Type</option>
+    <option value="PDF">PDF</option>
+    <option value="DOCUMENT">Document (Word, TXT)</option>
+    <option value="VIDEO">Video</option>
+    <option value="AUDIO">Audio</option>
+    <option value="IMAGE">Image</option>
+    <option value="OTHER">Other</option>
+</select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="category" class="form-label">Category *</label>
+                                    <select class="form-select" id="category" name="category" required>
+    <option value="">Select Category</option>
+    <option value="LECTURE_NOTES">Lecture Notes</option>
+    <option value="ASSIGNMENTS">Assignments</option>
+    <option value="PAST_PAPERS">Past Papers</option>
+    <option value="TEXTBOOKS">Textbooks</option>
+    <option value="RESEARCH_PAPERS">Research Papers</option>
+    <option value="OTHER">Other</option>
+</select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="courseCode" class="form-label">Course Code (Optional)</label>
+                                    <input type="text" class="form-control" id="courseCode" name="courseCode" 
+                                           placeholder="e.g., CS101">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="institution" class="form-label">Institution (Optional)</label>
+                                    <input type="text" class="form-control" id="institution" name="institution" 
+                                           placeholder="e.g., MIT">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="tags" class="form-label">Tags (Comma-separated)</label>
+                                <input type="text" class="form-control" id="tags" name="tags" 
+                                       placeholder="e.g., algorithms, data-structures, java">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="file" class="form-label">File * (Max 50MB)</label>
+                                <input type="file" class="form-control" id="file" name="file" required 
+                                       accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.md">
+                                <small class="text-muted">Supported formats: PDF, DOC, DOCX, PPT, PPTX, TXT, MD</small>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-cloud-upload"></i> Upload to IPFS
+                                </button>
+                                <a href="/dashboard" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - P2P Academic Share</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .register-card {
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            background: transparent;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .token-info {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card register-card">
+                    <div class="card-header text-center pt-4">
+                        <h3 class="mb-0">
+                            <i class="bi bi-person-plus-fill text-primary"></i> 
+                            Create Account
+                        </h3>
+                        <p class="text-muted">Join the decentralized academic community</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="token-info text-center">
+                            <i class="bi bi-gift fs-3"></i>
+                            <h5 class="mt-2">🎉 Welcome Bonus!</h5>
+                            <p class="mb-0">Get <strong>100 FREE Tokens</strong> upon registration</p>
+                            <small>Start earning more with Proof of Contribution</small>
+                        </div>
+
+                        <div th:if="${error}" class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            <span th:text="${error}">Error message</span>
+                        </div>
+
+                        <form action="/register" method="POST">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">
+                                    <i class="bi bi-person"></i> Username
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="username" 
+                                       name="username" 
+                                       required 
+                                       minlength="3"
+                                       pattern="[a-zA-Z0-9_]+"
+                                       placeholder="Choose a username">
+                                <small class="text-muted">Only letters, numbers, and underscores</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="bi bi-envelope"></i> Email
+                                </label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="email" 
+                                       name="email" 
+                                       required 
+                                       placeholder="your@email.com">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="bi bi-lock"></i> Password
+                                </label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="password" 
+                                       required 
+                                       minlength="6"
+                                       placeholder="Min 6 characters">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="confirmPassword" class="form-label">
+                                    <i class="bi bi-lock-fill"></i> Confirm Password
+                                </label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="confirmPassword" 
+                                       name="confirmPassword" 
+                                       required 
+                                       minlength="6"
+                                       placeholder="Re-enter password">
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="termsCheck" required>
+                                <label class="form-check-label" for="termsCheck">
+                                    I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms of Service</a>
+                                </label>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-person-plus"></i> Register & Get 100 Tokens
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <p class="mb-0">Already have an account? 
+                                <a href="/login" class="text-decoration-none">
+                                    Login here
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Preview -->
+                <div class="row mt-4 text-center text-white">
+                    <div class="col-4">
+                        <i class="bi bi-database fs-4"></i>
+                        <p class="small mb-0">IPFS Storage</p>
+                    </div>
+                    <div class="col-4">
+                        <i class="bi bi-trophy fs-4"></i>
+                        <p class="small mb-0">Earn Tokens</p>
+                    </div>
+                    <div class="col-4">
+                        <i class="bi bi-shield-check fs-4"></i>
+                        <p class="small mb-0">Peer Verified</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Terms of Service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>1. Decentralized Platform</h6>
+                    <p>Files are stored on IPFS network. Once uploaded, content cannot be guaranteed to be deleted due to the nature of distributed storage.</p>
+                    
+                    <h6>2. Proof of Contribution</h6>
+                    <p>Tokens are awarded for quality contributions. The platform reserves the right to adjust reward mechanisms.</p>
+                    
+                    <h6>3. Content Guidelines</h6>
+                    <p>Upload only academic content. No copyrighted materials without permission. No inappropriate content.</p>
+                    
+                    <h6>4. Token Usage</h6>
+                    <p>Tokens represent contribution value within the platform and have no monetary value outside.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Password match validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+            }
+        });
+    </script>
+</body>
+</html>
